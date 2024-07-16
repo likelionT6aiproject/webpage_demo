@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Welcome to MySite!</h1>
+    <p class="lead">This is a simple home page using Bootstrap for styling.</p>
+    <hr class="my-4">
+    <p>Use the navigation bar to login or sign up.</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'signup' %}" role="button">Sign Up</a>
+</div>
+{% endblock %}
+```
