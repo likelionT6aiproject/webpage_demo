@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+from django.core.paginator import Paginator
+from .models import article
 
 
 
@@ -27,7 +29,7 @@ class articleCreate(LoginRequiredMixin, FormView):
 
         # 폼에서 인스턴스 생성
         product_instance = form.save(commit=False)
-        product_instance.user_email = email  # 판매자 이메일 저장
+        product_instance.user_email = email  
         product_instance.save()
 
         return super().form_valid(form)
@@ -64,3 +66,23 @@ class articleDeleteView(DeleteView):
 
     # 템플릿 파일 이름 지정
     template_name = 'article_confirm_delete.html'
+
+
+class ArticleListView(ListView):
+    model = article
+    template_name = 'article_list.html'
+    context_object_name = 'articles'
+    paginate_by = 30
+
+    def get_queryset(self):
+        # 작성 날짜를 기준으로 내림차순 정렬
+        return article.objects.all().order_by('-created_date')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        articles = self.get_queryset()
+        paginator = Paginator(articles, self.paginate_by)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['page_obj'] = page_obj
+        return context

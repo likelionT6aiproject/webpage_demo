@@ -7,13 +7,42 @@
 <!-- include summernote css/js -->
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
-
 {% endblock %}
-
-
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/register_article.css' %}">
+<style>
+    .media-container {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px; /* 추가: 미디어 컨테이너 아래에 여유 공간 추가 */
+        width: 150px; /* 컨테이너의 너비 고정 */
+        height: 150px; /* 컨테이너의 높이 고정 */
+        overflow: hidden; /* 이미지가 컨테이너를 넘지 않도록 설정 */
+    }
+    .custom-file-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 150px;
+        height: 150px;
+        background-color: #f8f9fa;
+        border: 1px dashed #ced4da;
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
+    }
+    .media-preview {
+        display: none;
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0;
+    }
+</style>
 {% endblock %}
 
 {% block contents %}
@@ -24,13 +53,13 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="{{ form.article_name.id_for_label }}">article Name</label>
-                    <input type="text" class="form-control" id="{{ form.article_name.id_for_label }}" name="{{ form.article_name.name }}" placeholder="article Name">
+                    <label for="{{ form.article_name.id_for_label }}">Article Name</label>
+                    <input type="text" class="form-control" id="{{ form.article_name.id_for_label }}" name="{{ form.article_name.name }}" placeholder="Article Name">
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="{{ form.category.id_for_label }}">Product category</label>
+                    <label for="{{ form.category.id_for_label }}">Product Category</label>
                     <select class="form-control" id="{{ form.category.id_for_label }}" name="{{ form.category.name }}">
                         {% for category in form.category.field.queryset %}
                             <option value="{{ category.pk }}">{{ category.category_name }}</option>
@@ -39,7 +68,6 @@
                 </div>
             </div>
         </div>
-        
 
         <div class="form-group">
             <label for="{{ form.description.id_for_label }}">Description</label>
@@ -48,11 +76,11 @@
 
         <div class="form-group">
             <label>Media (Images)</label>
+            <br>
             <div class="media-container">
-                <input type="file" class="custom-file-input" id="article_img" name="article_img" accept="image/*">
+                <input type="file" class="custom-file-input" id="article_img" name="article_img" accept="image/*" style="display: none;">
                 <label for="article_img" class="custom-file-label media-box">+</label>
-                <!-- + 박스 더 필요하면 여기에 추가 -->
-                <!-- <div class="media-box">+</div> -->
+                <img id="media-preview" class="media-preview" src="#" alt="Image Preview">
             </div>
         </div>
 
@@ -62,40 +90,31 @@
 
 <script>
     $(document).ready(function () {
-        $('#id_description').summernote({
+        $('#{{ form.description.id_for_label }}').summernote({
             height: 300
         });
-    });
 
-    // 파일 선택 버튼을 숨기는 함수
-    function hideFileInput() {
-        document.querySelector('.custom-file-input').style.display = 'none';
-    }
+        $('.custom-file-label').on('click', function(event) {
+            event.preventDefault();  // 기본 동작 방지
+            $('.custom-file-input').click();
+        });
 
-    // 페이지 로드 시 파일 선택 버튼 숨기기
-    window.addEventListener('DOMContentLoaded', hideFileInput);
-
-    document.querySelector('.custom-file-label').addEventListener('click', function(event) {
-        event.preventDefault();  // 기본 동작 방지
-        document.querySelector('.custom-file-input').click();
-    });
-
-    document.querySelector('.custom-file-input').addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.querySelector('.custom-file-label').style.backgroundImage = 'url(' + e.target.result + ')';
-                document.querySelector('.custom-file-label').innerText = '';  // "+" 텍스트 제거
+        $('.custom-file-input').on('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#media-preview').attr('src', e.target.result).show();
+                    $('.custom-file-label').hide();  // "+" 텍스트 제거
+                }
+                reader.readAsDataURL(file);
+            } else {
+                $('#media-preview').hide();
+                $('.custom-file-label').show();
             }
-            reader.readAsDataURL(file);
-        } else {
-            // 선택된 파일이 없을 때 "+" 텍스트를 보여주고 파일 선택 버튼을 숨김
-            document.querySelector('.custom-file-label').style.backgroundImage = 'none';
-            document.querySelector('.custom-file-label').innerText = '+';
-            hideFileInput(); // 파일 선택 버튼 숨김
-        }
+        });
     });
 </script>
 
 {% endblock %}
+
