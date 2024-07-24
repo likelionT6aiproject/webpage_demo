@@ -38,6 +38,9 @@ class article(models.Model):
     article_img = models.ImageField(upload_to='product_images/', null=True, blank=True)  #이름 수정됨
     user_email = models.EmailField(null=True)
 
+    liked_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_articles', blank=True)  # ManyToManyField 추가
+    community_like = models.PositiveIntegerField(default=0)  # 좋아요 수를 저장할 필드
+    
     def __str__(self):
         return self.article_name
     

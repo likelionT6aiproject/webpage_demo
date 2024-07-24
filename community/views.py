@@ -86,3 +86,26 @@ class ArticleListView(ListView):
         page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj
         return context
+    
+    
+#===========좋아요==========================
+
+@login_required
+def like_post(request, pk):
+    if request.method == 'POST':
+        post = get_object_or_404(article, pk=pk)
+        if request.user not in post.liked_by.all():
+            post.liked_by.add(request.user)
+            post.community_like += 1
+            post.save()
+    return redirect('community:article_detail', pk=pk)
+
+@login_required
+def unlike_post(request, pk):
+    if request.method == 'POST':
+        post = get_object_or_404(article, pk=pk)
+        if request.user in post.liked_by.all():
+            post.liked_by.remove(request.user)
+            post.community_like -= 1
+            post.save()
+    return redirect('community:article_detail', pk=pk)

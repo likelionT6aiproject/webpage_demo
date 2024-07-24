@@ -10,4 +10,7 @@ urlpatterns = [
     path('<int:pk>/', views.articleDetail.as_view(), name='article_detail'), 
     path('<int:pk>/update/', articleUpdateView.as_view(), name='article_update'),
     path('<int:pk>/delete/', articleDeleteView.as_view(), name='article_delete'),
+    path('<int:pk>/like/', views.like_post, name='like_post'),
+    path('<int:pk>/unlike/', views.unlike_post, name='unlike_post'),
 ]
+
