@@ -41,6 +41,7 @@ class article(models.Model):
     liked_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_articles', blank=True)  # ManyToManyField 추가
     community_like = models.PositiveIntegerField(default=0)  # 좋아요 수를 저장할 필드
     
+    
     def __str__(self):
         return self.article_name
     
@@ -54,3 +55,14 @@ class article(models.Model):
         super().save(*args, **kwargs)
 
 
+class CommunityComment(models.Model):
+    community = models.ForeignKey(article, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    liked_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_comments', blank=True)
+    community_comment_like = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f'Comment by {self.author} on {self.community}'

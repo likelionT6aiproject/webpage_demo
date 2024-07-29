@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView, DeleteView
 from django.views.generic.edit import FormView, UpdateView
 from .models import article, Category
-from .forms import RegisterForm 
+from .forms import RegisterForm ,CommentForm, CommentEditForm
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -12,7 +12,9 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import article
+from .models import article,CommunityComment, article
+
+
 
 
 
@@ -109,3 +111,77 @@ def unlike_post(request, pk):
             post.community_like -= 1
             post.save()
     return redirect('community:article_detail', pk=pk)
+
+
+
+
+#=========댓글===========================================
+
+
+# 댓글 추가
+@login_required
+def add_comment(request, pk):
+    article_instance = get_object_or_404(article, pk=pk)
+    
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.community = article_instance
+            comment.author = request.user
+            comment.save()
+            return redirect('community:article_detail', pk=article_instance.pk)
+    else:
+        form = CommentForm()
+    
+    return render(request, 'add_comment.html', {'form': form, 'article': article_instance})
+
+# 댓글 수정
+@login_required
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(CommunityComment, id=comment_id)
+    if request.method == 'POST':
+        form = CommentEditForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Comment updated successfully.")
+            return redirect('community:article_detail', pk=comment.community.pk)
+    else:
+        form = CommentEditForm(instance=comment)
+    return render(request, 'edit_comment.html', {'form': form})
+
+# 댓글 삭제
+@login_required
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(CommunityComment, id=comment_id)
+    if request.method == 'POST':
+        comment.delete()
+        messages.success(request, "Comment deleted successfully.")
+        return redirect('community:article_detail', pk=comment.community.pk)
+    return render(request, 'community/delete_comment.html', {'comment': comment})
+
+# 댓글 좋아요
+@login_required
+def like_comment(request, comment_id):
+    if request.method == 'POST':
+        comment = get_object_or_404(CommunityComment, id=comment_id)
+        if request.user not in comment.liked_by.all():
+            comment.liked_by.add(request.user)
+            comment.community_comment_like += 1
+            comment.save()
+            messages.success(request, "Comment liked.")
+        return redirect('community:article_detail', pk=comment.community.pk)
+    return redirect('community:article_detail', pk=comment.community.pk)
+
+# 댓글 좋아요 취소
+@login_required
+def unlike_comment(request, comment_id):
+    if request.method == 'POST':
+        comment = get_object_or_404(CommunityComment, id=comment_id)
+        if request.user in comment.liked_by.all():
+            comment.liked_by.remove(request.user)
+            comment.community_comment_like -= 1
+            comment.save()
+            messages.success(request, "Comment unliked.")
+        return redirect('community:article_detail', pk=comment.community.pk)
+    return redirect('community:article_detail', pk=comment.community.pk)

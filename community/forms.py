@@ -2,6 +2,7 @@ from django import forms
 from PIL import Image
 from io import BytesIO
 from .models import article, Category
+from .models import CommunityComment
  
 class RegisterForm(forms.ModelForm):
 
@@ -26,3 +27,15 @@ class RegisterForm(forms.ModelForm):
         else:
             raise forms.ValidationError("이미지를 업로드하세요.")
 
+#===댓글
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = CommunityComment
+        fields = ['content']
+
+class CommentEditForm(forms.ModelForm):
+    class Meta:
+        model = CommunityComment
+        fields = ['content']

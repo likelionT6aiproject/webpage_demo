@@ -11,6 +11,7 @@
 
     <!-- Load static files -->
     {% load static %}
+    {% load humanize %}
 
     <style>
         .custom-btn {
@@ -82,6 +83,11 @@
         .info-section h3 {
             margin-top: 20px;
         }
+
+        .comment-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 <body>
@@ -147,6 +153,42 @@
                             <button type="submit" class="custom-btn">Unlike</button>
                         </form>
                     </div>
+
+                    <!-- 댓글 섹션 -->
+                    <hr>
+                    <h4>Comments</h4>
+                    <form method="POST" action="{% url 'community:add_comment' article.pk %}">
+                        {% csrf_token %}
+                        {{ comment_form.as_p }}
+                        <button type="submit" class="btn btn-primary">Add Comment</button>
+                    </form>
+                    <ul class="list-group mt-4">
+                        {% for comment in article.comments.all %}
+                        <li class="list-group-item">
+                            <strong>{{ comment.author.username }}</strong> - {{ comment.created_at|naturaltime }}
+                            <p>{{ comment.content }}</p>
+                            <div class="comment-buttons">
+                                <form method="POST" action="{% url 'community:like_comment' comment.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        Like ({{ comment.community_comment_like }})
+                                    </button>
+                                </form>
+                                <form method="POST" action="{% url 'community:unlike_comment' comment.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-secondary btn-sm">
+                                        Unlike
+                                    </button>
+                                </form>
+                                <a href="{% url 'community:edit_comment' comment.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                <form method="POST" action="{% url 'community:delete_comment' comment.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
