@@ -87,6 +87,33 @@
         .comment-buttons {
             display: flex;
             justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .like-unlike-section {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .like-icon {
+            color: red;
+            font-size: 1.5rem;
+        }
+
+        .like-count {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 1.2rem;
+        }
+
+        .comment-like-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comment-like-section .like-icon {
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -133,12 +160,14 @@
                     <!-- 좋아요와 싫어요 갯수 표시 -->
                     <div class="like-unlike-section mt-4">
                         <p>
-                            Likes: 
-                            {% if article.community_like > 99 %}
-                                99+
-                            {% else %}
-                                {{ article.community_like }}
-                            {% endif %}
+                            <span class="like-icon">❤️</span>
+                            <span class="like-count">
+                                {% if article.community_like > 99 %}
+                                    99+
+                                {% else %}
+                                    {{ article.community_like }}
+                                {% endif %}
+                            </span>
                         </p>
 
                         <!-- 좋아요 버튼 -->
@@ -167,24 +196,26 @@
                         <li class="list-group-item">
                             <strong>{{ comment.author.username }}</strong> - {{ comment.created_at|naturaltime }}
                             <p>{{ comment.content }}</p>
-                            <div class="comment-buttons">
-                                <form method="POST" action="{% url 'community:like_comment' comment.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary btn-sm">
-                                        Like ({{ comment.community_comment_like }})
-                                    </button>
-                                </form>
-                                <form method="POST" action="{% url 'community:unlike_comment' comment.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-secondary btn-sm">
-                                        Unlike
-                                    </button>
-                                </form>
-                                <a href="{% url 'community:edit_comment' comment.id %}" class="btn btn-warning btn-sm">Edit</a>
-                                <form method="POST" action="{% url 'community:delete_comment' comment.id %}" style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                </form>
+                            <div class="comment-like-section">
+                                <div>
+                                    <span class="like-icon">❤️</span>
+                                    <span class="like-count">{{ comment.community_comment_like }}</span>
+                                </div>
+                                <div class="comment-buttons">
+                                    <form method="POST" action="{% url 'community:like_comment' comment.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary btn-sm">Like</button>
+                                    </form>
+                                    <form method="POST" action="{% url 'community:unlike_comment' comment.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-secondary btn-sm">Unlike</button>
+                                    </form>
+                                    <a href="{% url 'community:edit_comment' comment.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                    <form method="POST" action="{% url 'community:delete_comment' comment.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </div>
                             </div>
                         </li>
                         {% endfor %}
